@@ -15,10 +15,13 @@ int main(int argc, char *argv[])
   // clean and then make qemu.
 
   char buf[512];
+  char input[512];
   int n;
+  int bufIndex = 0;
   for (;;)
   {
-    n = read(0, buf, sizeof(buf));
+    memset(input, 0, sizeof(input));
+    n = read(0, input, sizeof(input));
     if (n < 0)
     {
       fprintf(2, "xargs: read error\n");
@@ -35,17 +38,18 @@ int main(int argc, char *argv[])
     }
     */
     //print chars of buffer one by one
-    printf("Start of buf print");
+    printf("Start of buf print \n");
     for (int i = 0; i < 512; i++) {
-      if (buf[i] != 0) {
-        printf("%c", buf[i]);
+      if (input[i] != 0) {
+        buf[bufIndex] = input[i];
+        bufIndex++;
+      } else {
+        break;
       }
     }
-    printf("End of buf print");
-    memset(buf, 0, sizeof(buf));
-
+    printf("End of buf print \n");
   }
-
+  printf("\nBuf is: %s \n", buf);
 
   char *newArgv[32];
   for (int i = 0; i < argc; i++)
