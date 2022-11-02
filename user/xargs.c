@@ -33,6 +33,12 @@ int main(int argc, char *argv[])
     }
   }
 
+  char *newArgv[32];
+  for (int i = 0; i < argc; i++)
+  {
+    newArgv[i] = argv[i + 1];
+  }
+  newArgv[argc] = buf;
   //print buf
   fprintf(1, "buf: %s\n", buf);
 
@@ -40,6 +46,9 @@ int main(int argc, char *argv[])
   {
     printf("argv[%d] = %s \n", i, argv[i]);
   }
+  printf("result: \n");
+  exec(argv[1], newArgv);
+  fprintf(2, "xargs: exec %s failed\n", argv[1]);
 
   exit(0);
 }
