@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
   {
     newArgv[i] = argv[i + 1];
   }
-  newArgv[argc] = buf;
+  newArgv[argc-1] = buf;
   //print buf
   fprintf(1, "buf: %s\n", buf);
 
