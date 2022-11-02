@@ -136,8 +136,18 @@ void saveCmdToHistoryFile(char *cmd)
 {
   int fd = open("history.txt", O_CREATE | O_RDWR);
   //now we can write the command to the bottom of the file
-  write(fd, cmd, strlen(cmd));
-  write(fd, "\n", 1);
+  int x = write(fd, cmd, strlen(cmd));
+  if (x < 0)
+  {
+    fprintf(2, "history: cannot write to history.txt\n");
+    exit(1);
+  }
+  x = write(fd, "\n", 1);
+  if (x < 0)
+  {
+    fprintf(2, "history: cannot write to history.txt\n");
+    exit(1);
+  }
   close(fd);
 }
 
