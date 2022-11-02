@@ -41,6 +41,16 @@ int main(int argc, char *argv[])
   newArgv[argc-1] = buf;
   //print buf
   fprintf(1, "buf: %s\n", buf);
+  //check amount of new lines in buf
+  int newLines = 0;
+  for (int i = 0; i < sizeof(buf); i++)
+  {
+    if (buf[i] == '\n')
+    {
+      newLines++;
+    }
+  }
+  fprintf(1, "newLines: %d\n", newLines);
 
   for (int i = 0; i < 32; i++)
   {
