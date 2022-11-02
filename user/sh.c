@@ -131,7 +131,7 @@ runcmd(struct cmd *cmd)
   }
   exit(0);
 }
-
+/*
 void saveCmdToHistoryFile(char *cmd)
 {
   int fd = open("history.txt", O_CREATE | O_RDWR);
@@ -150,6 +150,7 @@ void saveCmdToHistoryFile(char *cmd)
   }
   close(fd);
 }
+*/
 
 int
 getcmd(char *buf, int nbuf)
@@ -192,9 +193,10 @@ main(void)
       continue;
     }
     if(fork1() == 0) {
-      struct cmd *cmd = parsecmd(buf);
+      runcmd(parsecmd(buf));
+      /*struct cmd *cmd = parsecmd(buf);
       saveCmdToHistoryFile(buf);
-      runcmd(cmd);
+      runcmd(cmd);*/
     } 
     wait(0);
   }
