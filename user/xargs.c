@@ -13,6 +13,7 @@ int main(int argc, char *argv[])
   // kernel/param.h declares MAXARG, which may be useful if you need to declare an argv array.
   // Changes to the file system persist across runs of qemu; to get a clean file system run make
   // clean and then make qemu.
+
   char buf[512];
   int n;
   for (;;)
@@ -27,11 +28,16 @@ int main(int argc, char *argv[])
     {
       break;
     }
+    /*
     if (write(1, buf, n) != n) {
       fprintf(2, "xargs: write error\n");
       exit(1);
     }
+    */
+    fprintf(1, "buf Inside for true: %s\n", buf);
+
   }
+
 
   char *newArgv[32];
   for (int i = 0; i < argc; i++)
