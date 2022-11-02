@@ -131,6 +131,59 @@ runcmd(struct cmd *cmd)
   exit(0);
 }
 
+void saveCmdToHistoryFile(char *cmd)
+{
+  int fd = open("history.txt", O_CREATE | O_RDWR);
+  if (fd < 0)
+  {
+    fprintf(2, "open history.txt failed\n");
+    exit(1);
+  }
+  //first we need to find out how many lines are in the file
+  int lines = 0;
+  char c;
+  while (read(fd, &c, 1) == 1)
+  {
+    if (c == '\n')
+    {
+      lines++;
+    }
+  }
+  //if there are more than 500 lines, we need to delete the first line
+  if (lines >= 500)
+  {
+    //we need to delete the first line
+    //first we need to find out where the first line ends
+    int firstLineEnd = 0;
+    while (read(fd, &c, 1) == 1)
+    {
+      if (c == '\n')
+      {
+        firstLineEnd++;
+        break;
+      }
+      firstLineEnd++;
+    }
+    //now we need to move the rest of the file to the beginning of the file
+    char buf[512];
+    int n;
+    while ((n = read(fd, buf, sizeof(buf))) > 0)
+    {
+      write(fd, buf, n);
+    }
+    //now we need to truncate the file
+    if (ftruncate(fd, firstLineEnd) < 0)
+    {
+      fprintf(2, "ftruncate failed\n");
+      exit(1);
+    }
+  }
+  //now we can write the command to the bottom of the file
+  write(fd, cmd, strlen(cmd));
+  write(fd, "\n", 1);
+  close(fd);
+}
+
 int
 getcmd(char *buf, int nbuf)
 {
@@ -171,8 +224,11 @@ main(void)
         fprintf(2, "cannot cd %s\n", buf+3);
       continue;
     }
-    if(fork1() == 0)
-      runcmd(parsecmd(buf));
+    if(fork1() == 0) {
+      struct cmd *cmd = parsecmd(buf);
+      saveCmdToHistoryFile(cmd);
+      runcmd(cmd);
+    } 
     wait(0);
   }
   exit(0);
