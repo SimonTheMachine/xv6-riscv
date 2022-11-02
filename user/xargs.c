@@ -34,7 +34,15 @@ int main(int argc, char *argv[])
       exit(1);
     }
     */
-    fprintf(1, "buf Inside for true: %s\n", buf);
+    //print chars of buffer one by one
+    printf("Start of buf print");
+    for (int i = 0; i < 512; i++) {
+      if (buf[i] != 0) {
+        printf("%c", buf[i]);
+      }
+    }
+    printf("End of buf print");
+    memset(buf, 0, sizeof(buf));
 
   }
 
