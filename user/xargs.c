@@ -1,6 +1,7 @@
 
 #include "kernel/types.h"
 #include "user/user.h"
+
 int main(int argc, char *argv[])
 {
   // read lines from the standard input
@@ -31,55 +32,56 @@ int main(int argc, char *argv[])
     {
       break;
     }
-    /*
-    if (write(1, buf, n) != n) {
-      fprintf(2, "xargs: write error\n");
-      exit(1);
-    }
-    */
-    //print chars of buffer one by one
-    printf("Start of buf print \n");
-    for (int i = 0; i < 512; i++) {
-      if (input[i] != 0) {
+    // print chars of buffer one by one
+    for (int i = 0; i < 512; i++)
+    {
+      if (input[i] != 0)
+      {
         buf[bufIndex] = input[i];
         bufIndex++;
-      } else {
+      }
+      else
+      {
         break;
       }
     }
-    printf("End of buf print \n");
   }
-  printf("\nBuf is: %s \n", buf);
+  printf("\nBuf is:\n \n %s \n \n", buf);
 
-  char *newArgv[32];
-  for (int i = 0; i < argc; i++)
-  {
-    newArgv[i] = argv[i + 1];
-  }
-  newArgv[argc-1] = buf;
-  //print buf
-  fprintf(1, "buf: %s\n", buf);
-  //check amount of new lines in buf
-  int newLines = 0;
+  char lineCommand[512];
+  int lineCommandIndex = 0;
   for (int i = 0; i < sizeof(buf); i++)
   {
     if (buf[i] == '\n')
     {
-      newLines++;
-    }
-  }
-  fprintf(1, "newLines: %d\n", newLines);
 
-  for (int i = 0; i < 32; i++)
-  {
-    if (newArgv[i] != 0)
+      // do the exec for the current lineCommand
+      char *newArgv[32];
+      for (int i = 0; i < argc; i++)
+      {
+        newArgv[i] = argv[i + 1];
+      }
+      newArgv[argc - 1] = lineCommand;
+
+      if (fork() == 0)
+      {
+        exec(argv[1], newArgv);
+      }
+      else
+      {
+        wait(0);
+      }
+      
+      // reset lineCommand
+      memset(lineCommand, 0, sizeof(lineCommand));
+      lineCommandIndex = 0;
+    }
+    else
     {
-      fprintf(1, "newArgv[%d]: %s\n", i, newArgv[i]);
+      lineCommand[lineCommandIndex] = buf[i];
+      lineCommandIndex++;
     }
   }
-  printf("result: \n");
-  exec(argv[1], newArgv);
-  fprintf(2, "xargs: exec %s failed\n", argv[1]);
 
   exit(0);
 }
