@@ -156,6 +156,12 @@ main(void)
     }
   }
 
+  //check if there is a file called commandhistory in the current directory
+  //if not, create one
+  if(open("commandHistory.txt", O_RDWR) < 0){
+    close(open("commandHistory.txt", O_CREATE));
+  }
+
   // Read and run input commands.
   while(getcmd(buf, sizeof(buf)) >= 0){
     if(buf[0] == 'c' && buf[1] == 'd' && buf[2] == ' '){
