@@ -42,9 +42,12 @@ int main(int argc, char *argv[])
   //print buf
   fprintf(1, "buf: %s\n", buf);
 
-  for (int i = 0; i < argc; i++)
+  for (int i = 0; i < 32; i++)
   {
-    printf("argv[%d] = %s \n", i, argv[i]);
+    if (newArgv[i] != 0)
+    {
+      fprintf(1, "newArgv[%d]: %s\n", i, newArgv[i]);
+    }
   }
   printf("result: \n");
   exec(argv[1], newArgv);
