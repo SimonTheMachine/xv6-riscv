@@ -15,24 +15,25 @@ int main(int argc, char *argv[])
   // Changes to the file system persist across runs of qemu; to get a clean file system run make
   // clean and then make qemu.
 
+  //Read lines from the standard input:
+  //buf is gonna be a string that contains all the input lines.
   char buf[512];
+  //input is gonna be the directory to read from the standard input.
   char input[512];
+  //to check if input is empty or not.
   int n;
+  //index used to initialize the standard input into buffer. 
   int bufIndex = 0;
   for (;;)
   {
-    memset(input, 0, sizeof(input));
+    //reset to make 
+    //memset(input, 0, sizeof(input));
     n = read(0, input, sizeof(input));
-    if (n < 0)
-    {
-      fprintf(2, "xargs: read error\n");
-      exit(1);
-    }
     if (n == 0)
     {
       break;
     }
-    // print chars of buffer one by one
+    //go through 
     for (int i = 0; i < 512; i++)
     {
       if (input[i] != 0)
@@ -71,7 +72,7 @@ int main(int argc, char *argv[])
       {
         wait(0);
       }
-      
+
       // reset lineCommand
       memset(lineCommand, 0, sizeof(lineCommand));
       lineCommandIndex = 0;
