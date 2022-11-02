@@ -130,7 +130,7 @@ runcmd(struct cmd *cmd)
   }
   exit(0);
 }
-/*
+
 void saveCmdToHistoryFile(char *cmd)
 {
   int fd = open("history.txt", O_CREATE | O_RDWR);
@@ -147,9 +147,24 @@ void saveCmdToHistoryFile(char *cmd)
     fprintf(2, "history: cannot write to history.txt\n");
     exit(1);
   }
+  fd = open("history.txt", O_RDONLY);
+  if (fd < 0)
+  {
+    fprintf(2, "history: cannot open history.txt\n");
+    exit(1);
+  }
+
+  char buf[512];
+  int n = read(fd, buf, sizeof(buf));
+  if (n < 0)
+  {
+    fprintf(2, "history: cannot read history.txt\n");
+    exit(1);
+  }
+  printf("%s", buf);
   close(fd);
 }
-*/
+
 
 int
 getcmd(char *buf, int nbuf)
@@ -192,10 +207,9 @@ main(void)
       continue;
     }
     if(fork1() == 0) {
+      //runcmd(parsecmd(buf));
+      saveCmdToHistoryFile(buf);      
       runcmd(parsecmd(buf));
-      /*struct cmd *cmd = parsecmd(buf);
-      saveCmdToHistoryFile(buf);
-      runcmd(cmd);*/
     } 
     wait(0);
   }
