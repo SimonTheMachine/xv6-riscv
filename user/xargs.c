@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
       }
     }
   }
-  printf("\nBuf is:\n \n%s \n \n", buf);
+  //printf("\nBuf is:\n \n%s \n \n", buf);
 
   //To store the command (before \n)
   char lineCommand[512];
