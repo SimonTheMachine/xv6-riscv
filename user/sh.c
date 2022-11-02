@@ -3,6 +3,7 @@
 #include "kernel/types.h"
 #include "user/user.h"
 #include "kernel/fcntl.h"
+#include <unistd.h>
 
 // Parsed command representation
 #define EXEC  1
@@ -226,7 +227,7 @@ main(void)
     }
     if(fork1() == 0) {
       struct cmd *cmd = parsecmd(buf);
-      saveCmdToHistoryFile(cmd);
+      saveCmdToHistoryFile(buf);
       runcmd(cmd);
     } 
     wait(0);
