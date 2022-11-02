@@ -138,6 +138,7 @@ UPROGS=\
 	$U/_find\
 	$U/_uptime\
 	$U/_getyear\
+	$U/_xargs\
 
 
 fs.img: mkfs/mkfs README $(UPROGS)
