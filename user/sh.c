@@ -182,7 +182,7 @@ int main(void)
     {
       //NEW CODE BIT START
 			if (hl >= 0) {
-				int size = strlen(buf) +1;
+				int size = strlen(buf);
 				if (write(hl, buf, size) != size) {
 						fprintf(2, "failed to write to historyLog\n");
 				}
