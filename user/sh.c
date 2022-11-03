@@ -140,52 +140,6 @@ void runcmd(struct cmd *cmd)
   exit(0);
 }
 
-void saveCmdToHistoryFile(char *cmd)
-{
-  //1. Read file and check length. (delete line if necessary)
-
-  //2. Write to file
-  int fd = open("history.txt", O_CREATE | O_RDWR);
-  // now we can write the command to the bottom of the file
-  int x = write(fd, cmd, strlen(cmd));
-  if (x < 0)
-  {
-    fprintf(2, "history: cannot write to history.txt\n");
-    exit(1);
-  }
-  x = write(fd, "\n", 1);
-  if (x < 0)
-  {
-    fprintf(2, "history: cannot write to history.txt\n");
-    exit(1);
-  }
-
-  fd = open("history.txt", O_RDONLY);
-  if (fd < 0)
-  {
-    fprintf(2, "history: cannot open history.txt\n");
-    exit(1);
-  }
-
-  char buf[512];
-  for (;;)
-  {
-    int n = read(fd, buf, sizeof(buf));
-    if (n < 0)
-    {
-      fprintf(2, "history: cannot read history.txt\n");
-      exit(1);
-    }
-    if (n == 0) {
-      break;
-    }
-    printf("%s", buf);
-  }
-  printf("\nDone reading history.txt\n");
-
-  close(fd);
-}
-
 int getcmd(char *buf, int nbuf)
 {
   write(2, "$ ", 2);
@@ -211,12 +165,7 @@ int main(void)
     }
   }
 
-  // check if there is a file called commandhistory in the current directory
-  // if not, create one
-  if (open("commandHistory.txt", O_RDWR) < 0)
-  {
-    close(open("commandHistory.txt", O_CREATE));
-  }
+  int hl = open("historyLog", O_CREATE | O_RDWR); 
 
   // Read and run input commands.
   while (getcmd(buf, sizeof(buf)) >= 0)
@@ -231,12 +180,26 @@ int main(void)
     }
     if (fork1() == 0)
     {
-      // runcmd(parsecmd(buf));
-      saveCmdToHistoryFile(buf);
+      //NEW CODE BIT START
+			if (hl >= 0) {
+				int size = strlen(buf) +1;
+				if (write(hl, buf, size) != size) {
+						fprintf(2, "failed to write to historyLog\n");
+				}
+			}
+			else {
+				fprintf(2, "cannot open historyLog\n");
+			}
+			//NEW CODE BIT END
       runcmd(parsecmd(buf));
     }
     wait(0);
   }
+  //NEW CODE BIT START
+	close(hl);
+	//removes a file:
+	unlink("historyLog");
+	//NEW CODE BIT END.
   exit(0);
 }
 

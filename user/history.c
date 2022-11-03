@@ -1,42 +1,44 @@
 #include "kernel/types.h"
+#include "kernel/stat.h"
 #include "user/user.h"
-#include "kernel/fcntl.h"
+#include "kernel/param.h"
+
+void readHis(int hf, int num){
+		int count = 0, length = 0;
+		char output[512]; //size of historyLog isn't known - lazy solution to assign a lot of memory
+		while(read(hf, output, sizeof(output))) {}
+		//historyLog is written in reverse order - we need to keep track of how many lines there are so we can read it in reverse order.
+		if(num != 0){
+				for(int i = 0; i < sizeof(output); i++){
+						if(output[i] == '\n'){
+								length++; // counting lines
+						}
+				 }
+		}
+		//loop through and only print if we are reading normally or if its in the bottom argv[1] lines
+		for(int i = 0; i < sizeof(output); i++){
+				if(num == 0 || count >= length - num){
+						printf("%c", output[i]);
+				}
+				if(output[i] == '\n'){
+						count++;
+				}
+		}
+}
 
 int main(int argc, char *argv[])
 {
-  if (argc != 2)
-  {
-    fprintf(2, "Usage: history <number of commands>\n");
-    exit(1);
-  }
-  int n = atoi(argv[1]);
-  if (n < 1)
-  {
-    fprintf(2, "Usage: history <number of commands>\n");
-    exit(1);
-  }
-  // get history from history.txt file and print the last n lines of file
-  int fd = open("history.txt", O_RDONLY);
-  if (fd < 0)
-  {
-    fprintf(2, "history: cannot open history.txt\n");
-    exit(1);
-  }
-  char buf[512];
-  n = read(fd, buf, sizeof(buf));
-  if (n < 0)
-  {
-    fprintf(2, "history: cannot read history.txt\n");
-    exit(1);
-  }
-  for (int i = 0; i<n; i++) {
-    if (buf[i] != 0) {
-      fprintf(1, "%c", buf[i]);
-    }
-  }
-
-  
-
-  
-  exit(0);
+	int hl;
+	if((hl = open("historyLog", 0)) < 0){ //check we can open the file
+			fprintf(1, "cannot open historyLog\n");
+			exit(1);
+	}
+	if (argc == 1){ //read normally
+			readHis(hl, 0);
+	}
+	else{ //read a set number of lines - starting at the bottom
+			readHis(hl, atoi(argv[1]));
+	}
+	close(hl);
+	return 0;
 }
