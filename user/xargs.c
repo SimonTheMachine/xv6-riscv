@@ -20,8 +20,6 @@ int main(int argc, char *argv[])
   char buf[512];
   //input is gonna be the directory to read from the standard input.
   char input;
-  //to check if input is empty or not.
-  int n;
   //index used to initialize the standard input into buffer. 
   int bufIndex = 0;
   while(read(0, &input, 1))
