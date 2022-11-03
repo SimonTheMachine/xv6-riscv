@@ -19,47 +19,20 @@ int main(int argc, char *argv[])
   //buf is gonna be a string that contains all the input lines.
   char buf[512];
   //input is gonna be the directory to read from the standard input.
-  char input[512];
+  char input;
   //to check if input is empty or not.
   int n;
   //index used to initialize the standard input into buffer. 
   int bufIndex = 0;
-  for (;;)
+  while(read(0, &input, 1))
   {
-    //reset input since we use the same array to read from 
-    //standard input each time. 
-    memset(input, 0, sizeof(input));
-    //read from standard input.
-    n = read(0, input, sizeof(input));
-    if (n == 0)
+    //if the input is not empty, then add it to the buffer.
+    if(input != '\n')
     {
-      break;
-    }
-    //Copy the new input into buf. 
-    for (int i = 0; i < 512; i++)
-    {
-      if (input[i] != 0)
-      {
-        buf[bufIndex] = input[i];
-        bufIndex++;
-      }
-      else
-      {
-        break;
-      }
-    }
-  }
-  //printf("\nBuf is:\n \n%s \n \n", buf);
+      buf[bufIndex] = input;
+      bufIndex++;
+    }else {
 
-  //To store the command (before \n)
-  char lineCommand[512];
-  //so we know which index to put new characters into the command array.
-  int lineCommandIndex = 0;
-  for (int i = 0; i < sizeof(buf); i++)
-  {
-    //If we reach a new line, we know that we have a command.
-    if (buf[i] == '\n')
-    {
       // do the exec for the current lineCommand
       //32 is MAXARG.
       char *newArgv[32];
@@ -70,7 +43,7 @@ int main(int argc, char *argv[])
         newArgv[i] = argv[i + 1];
       }
       //We add the command to the end of the newArgv.
-      newArgv[argc - 1] = lineCommand;
+      newArgv[argc - 1] = buf;
 
       if (fork() == 0) //child
       {
@@ -85,16 +58,11 @@ int main(int argc, char *argv[])
         wait(0);
       }
 
-      // reset lineCommand
-      memset(lineCommand, 0, sizeof(lineCommand));
-      lineCommandIndex = 0;
+      // reset buffer
+      memset(buf, 0, sizeof(buf));
+      bufIndex = 0;
     }
-    else
-    {
-      //If we haven't reached a new line, we add the character to the lineCommand.
-      lineCommand[lineCommandIndex] = buf[i];
-      lineCommandIndex++;
-    }
+    
   }
 
   exit(0);
