@@ -1,12 +1,14 @@
 
+
 #include "memory_management.h"
 
+struct memoryBlock *headOfMemoryList;
 //Function to allocate memory
 void* _malloc(int size) {
   struct memoryBlock *current, *previous;
 
   //First we need to check if head is null. If it is, we need to initialize it.
-  if (head) {
+  if (headOfMemoryList) {
     //If it is null, we need to initialize the head
     int totalSize = size + sizeof(struct memoryBlock);
 
@@ -18,18 +20,18 @@ void* _malloc(int size) {
       return 0;
     }
     //If sbrk succeeds, we set the head to the start of the new memory
-    head = (struct memoryBlock*) startOfNewMemory;
+    headOfMemoryList = (struct memoryBlock*) startOfNewMemory;
     //We set the size of the head to the size of the memory block
-    head->size = size;
+    headOfMemoryList->size = size;
     //We set the isFree flag to 0
-    head->isFree = 0;
+    headOfMemoryList->isFree = 0;
     //We return the address of the space after the memory block
     return (void*) (startOfNewMemory + sizeof(struct memoryBlock));    
   }
 
   //Next case: head is not null: we check if there is a free block that is big enough
-  previous = head;
-  current = head;
+  previous = headOfMemoryList;
+  current = headOfMemoryList;
   while (current) {
     //If the current block is free and big enough, we use it
     if (current->isFree && current->size == size) {
@@ -99,8 +101,8 @@ void _free(void *ptr) {
     block->next = block->next->next;
   }
   //We also need to check if the previous block is free. If it is, we merge the two blocks
-  struct memoryBlock *current = head;
-  struct memoryBlock *previous = head;
+  struct memoryBlock *current = headOfMemoryList;
+  struct memoryBlock *previous = headOfMemoryList;
   while (current) {
     if (current == block) {
       if (previous->isFree) {
