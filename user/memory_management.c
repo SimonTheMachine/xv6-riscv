@@ -1,186 +1,115 @@
-#include "kernel/types.h"
-#include "kernel/stat.h"
-#include "user/user.h"
-#include "kernel/param.h"
 
-struct memoryChunk
-{
-  // Bool deciding if the chunk of memory is available or not. 0 means not free, 1 means free.
-  int isFree;
-  // How big this node is
-  int size;
-  // a struct to the next node:
-  struct node *next;
-};
-// initialize the head of the linked list to nullpointer
-struct memoryChunk *head = NULL;
+#include "memory_management.h"
 
-// This method will allocate memory and assumes that there is space enough for the allocation
-// This splits the first chunk (which is assumed to be free memory) into two chunks, one of which is the size of the allocation and the other is the rest of the memory
-void splitAndInsert(struct memoryChunk *chunk, int size)
-{
-  chunk->size -= size;
-  // If the size of the chunk is 0, we just allocate the new memory into the chunk
-  if (chunk->size == 0)
-  {
-    chunk->isFree = 0;
-    chunk->size = size;
+//Function to allocate memory
+void* _malloc(int size) {
+  struct memoryBlock *current, *previous;
+
+  //First we need to check if head is null. If it is, we need to initialize it.
+  if (head) {
+    //If it is null, we need to initialize the head
+    int totalSize = size + sizeof(struct memoryBlock);
+
+    char *startOfNewMemory;
+    //sbrk grows memory by the number of bytes specified
+    startOfNewMemory = sbrk(totalSize);
+    if (startOfNewMemory == (char*) -1) {
+      //If sbrk fails, we return 0
+      return 0;
+    }
+    //If sbrk succeeds, we set the head to the start of the new memory
+    head = (struct memoryBlock*) startOfNewMemory;
+    //We set the size of the head to the size of the memory block
+    head->size = size;
+    //We set the isFree flag to 0
+    head->isFree = 0;
+    //We return the address of the space after the memory block
+    return (void*) (startOfNewMemory + sizeof(struct memoryBlock));    
+  }
+
+  //Next case: head is not null: we check if there is a free block that is big enough
+  previous = head;
+  current = head;
+  while (current) {
+    //If the current block is free and big enough, we use it
+    if (current->isFree && current->size == size) {
+      //We set the isFree flag to 0
+      current->isFree = 0;
+      //We return the address of the space after the memory block
+      return (void*) ((char*) current + sizeof(struct memoryBlock));
+    } else if (current->isFree && (current->size - sizeof(struct memoryBlock)) > size) {
+
+      //First we create a new memory block after the current block
+      struct memoryBlock *newBlock = (struct memoryBlock*) ((char*) current + sizeof(struct memoryBlock) + size);
+      //We set the size of the new block to the size of the current block minus the size of the memory block and the size of the new block
+      newBlock->size = current->size - size - sizeof(struct memoryBlock);
+      //We set the next pointer to the next pointer of the current block
+      newBlock->next = current->next;
+      //We set the isFree flag to 1
+      newBlock->isFree = 1;
+
+      // now we adjust the current block:
+      //We set the size of the current block to the size of the new block
+      current->size = size;
+      //We set the next pointer to the new block
+      current->next = newBlock;
+      //We set the isFree flag to 0
+      current->isFree = 0;
+      //We return the address of the space after the memory block
+      return (void*) ((char*) current + sizeof(struct memoryBlock));
+    }
+    //If the current block is not free or not big enough, we move on to the next block
+    previous = current;
+    current = current->next;
+  }
+  //If we get to this point, it means that there is no free block that is big enough
+  //So we need to create a new block
+  int totalSize = size + sizeof(struct memoryBlock);
+  char *startOfNewMemory;
+  //sbrk grows memory by the number of bytes specified
+  startOfNewMemory = sbrk(totalSize);
+  if (startOfNewMemory == (char*) -1) {
+    //If sbrk fails, we return 0
+    return 0;
+  }
+  //If sbrk succeeds, we set the next pointer of the previous block to the start of the new memory
+  previous->next = (struct memoryBlock*) startOfNewMemory;
+  //We set the size of the new block to the size of the memory block
+  previous->next->size = size;
+  //We set the isFree flag to 0
+  previous->next->isFree = 0;
+  //We return the address of the space after the memory block
+  return (void*) (startOfNewMemory + sizeof(struct memoryBlock));
+}
+
+
+//Function to free memory
+void _free(void *ptr) {
+  //If the pointer is null, we do nothing
+  if (!ptr) {
     return;
   }
-  // Here newChunk is the new chunk of memory that we will allocate
-  struct memoryChunk *newChunk = NULL;
-  newChunk->size = size;
-  newChunk->isFree = 0;
-  // We set the next pointer of the new chunk to the next pointer of the old chunk
-  newChunk->next = chunk->next;
-  // We set the next pointer of the old chunk to the new chunk
-  chunk->next = newChunk;
-  // Hereby we have inserted the new chunk and allocated memory for it to the right of the linked list.
-}
-void *_malloc(int size)
-{
-  // If the head is null, then we need to initialize the linked list
-  // And allocate memory for it.
-  if (head == NULL)
-  {
-    char *p;
-    p = sbrk(size);
-    head->isFree = 1;
-    head->size = size;
-    head->next = NULL;
-    // return something IDK
-    return p;
-  }
-  // If the head is free memory we know that it contains all the free memory. (this is because of the way
-  // we have defined the free method). If the head is free memory and the size of the head is bigger than
-  //  the size we want to allocate we split the head into the rest of free memory and an allocated memory.
-  if (head->isFree == 1 && head->size >= size)
-  {
-    splitAndInsert(head, size);
-    // return something IDK
-    return head;
-  }
-  // If the head isn't free memory we need to expand the memory to make room for the new memory
-  // we do this by expanding by size, adding the size to the head (the free memory location)
-  // and then we split the free memory into the rest of the free memory and the allocated memory.
-  char *p;
-  p = sbrk(size);
-  head->size += size;
-  splitAndInsert(head, size);
-}
+  //If the pointer is not null, we set the isFree flag to 1
+  struct memoryBlock *block = (struct memoryBlock*) ((char*) ptr - sizeof(struct memoryBlock));
+  block->isFree = 1;
 
-void _free(void *ptr)
-{
-  // Free memory and merge with other free memory, so that all free memory is at the start of the linked list
-  struct memoryChunk *iHead = head;
-  // We traverse each node in the linked list
-  while (iHead->next != NULL)
-  {
-    // Do some kind of comparison to see if the pointer is the same as the pointer in the linked list IDK
-    if (iHead->isFree == 0 && iHead->next == ptr)
-    {
-      struct memoryChunk *freedMemoryChunk = iHead->next;
-      // We then need to add the memory of the freed memory to the free memory chunk in the front of the linked list
-      head->size += freedMemoryChunk->size;
-      // We then need to remove the freed memory chunk from the linked list
-      iHead->next = freedMemoryChunk->next;
+  //We also need to check if the next block is free. If it is, we merge the two blocks
+  if (block->next && block->next->isFree) {
+    block->size += block->next->size + sizeof(struct memoryBlock);
+    block->next = block->next->next;
+  }
+  //We also need to check if the previous block is free. If it is, we merge the two blocks
+  struct memoryBlock *current = head;
+  struct memoryBlock *previous = head;
+  while (current) {
+    if (current == block) {
+      if (previous->isFree) {
+        previous->size += current->size + sizeof(struct memoryBlock);
+        previous->next = current->next;
+      }
       return;
     }
-    iHead = iHead->next;
+    previous = current;
+    current = current->next;
   }
 }
-
-
-
-/*
-// This function will shuffle the non free memorychunks to the end of the linked list.
-void shuffle()
-{
-  // We create a new head and a new tail
-  struct memoryChunk *newHead = NULL;
-  struct memoryChunk *newTail = NULL;
-
-  // We create a temporary pointer to the head of the linked list
-  struct memoryChunk *temp = head;
-
-  // We loop through the linked list
-  while (temp != NULL)
-  {
-    // If the chunk is not free we add it to the end of the linked list
-    if (temp->isFree == 0)
-    {
-      // If the new head is nullpointer we set the new head to be the current chunk
-      if (newHead == NULL)
-      {
-        newHead = temp;
-        newTail = temp;
-      }
-      // If the new head is not nullpointer we set the next pointer of the new tail to be the current chunk and then set the new tail to be the current chunk
-      else
-      {
-        newTail->next = temp;
-        newTail = temp;
-      }
-    }
-    // If the chunk is free we add it to the beginning of the linked list
-    else
-    {
-      // If the new head is nullpointer we set the new head to be the current chunk
-      if (newHead == NULL)
-      {
-        newHead = temp;
-        newTail = temp;
-      }
-      // If the new head is not nullpointer we set the next pointer of the current chunk to be the new head and then set the new head to be the current chunk
-      else
-      {
-        temp->next = newHead;
-        newHead = temp;
-      }
-    }
-    // We set the current chunk to be the next chunk in the linked list
-    temp = temp->next;
-  }
-  // We also need to merge all the free memorychunks together
-  temp = newHead;
-  // We loop through the linked list
-  while (temp != NULL)
-  {
-    // If the current chunk is free and the next chunk is free we merge them together
-    if (temp->isFree == 1 && temp->next->isFree == 1)
-    {
-      // We set the size of the current chunk to be the size of the current chunk plus the size of the next chunk
-      temp->size = temp->size + temp->next->size;
-      // We set the next pointer of the current chunk to be the next pointer of the next chunk
-      temp->next = temp->next->next;
-    }
-    // We set the current chunk to be the next chunk in the linked list
-    temp = temp->next;
-  }
-  // We set the next pointer of the new tail to be nullpointer
-  newTail->next = NULL;
-  // We set the head of the linked list to be the new head
-  head = newHead;
-}
-
-int tryAndInsertNewChunk(int size, struct memoryChunk *iHead)
-{
-  int found = 0;
-  // We traverse each node in the linked list
-  while (iHead->next != NULL && found == 0)
-  {
-    if (iHead->isFree == 1 && iHead->size >= size)
-    {
-      // then we need to perform a split where we allocate the memory
-      // and then we need to create a new node for the rest of the memory
-      split(iHead, size);
-      found = 1;
-    }
-    else
-    {
-      iHead = iHead->next;
-    }
-  }
-  return found;
-}
-*/
