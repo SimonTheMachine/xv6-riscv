@@ -1,117 +1,137 @@
-
-
 #include "memory_management.h"
-
+// The actual head of the memory.
 struct memoryBlock *headOfMemoryList;
-//Function to allocate memory
-void* _malloc(int size) {
-  struct memoryBlock *current, *previous;
 
-  //First we need to check if head is null. If it is, we need to initialize it.
-  if (headOfMemoryList) {
-    //If it is null, we need to initialize the head
-    int totalSize = size + sizeof(struct memoryBlock);
+// Function to allocate memory
+void *_malloc(int size)
+{
 
+  // The size of the memory block is the size of the memoryBlock struct + the size of the memory requested
+  int totalSize = size + sizeof(struct memoryBlock);
+
+  // First we need to check if head is null. If it is, this means
+  // we haven't allocated any memory yet. Then we need to initialize it.
+  if (headOfMemoryList)
+  {
+
+    // Initializes pointer used to store the start of the memory grown by sbrk.
     char *startOfNewMemory;
-    //sbrk grows memory by the number of bytes specified
+    // System call that grows process memory by totalSize of bytes.
     startOfNewMemory = sbrk(totalSize);
-    if (startOfNewMemory == (char*) -1) {
-      //If sbrk fails, we return 0
+
+    // If sbrk fails, we return 0
+    if (startOfNewMemory == (char *)-1)
+    {
       return 0;
     }
-    //If sbrk succeeds, we set the head to the start of the new memory
-    headOfMemoryList = (struct memoryBlock*) startOfNewMemory;
-    //We set the size of the head to the size of the memory block
+    // If sbrk succeeds, we set the head to the start of the new memory
+    headOfMemoryList = (struct memoryBlock *)startOfNewMemory;
+    // We set the size of the head to the size of the memory block
     headOfMemoryList->size = size;
-    //We set the isFree flag to 0
+    // We set the isFree flag to 0
     headOfMemoryList->isFree = 0;
-    //We return the address of the space after the memory block
-    return (void*) (startOfNewMemory + sizeof(struct memoryBlock));    
+    // We return the address of the space after the memory block
+    return (void *)(startOfNewMemory + sizeof(struct memoryBlock));
   }
 
-  //Next case: head is not null: we check if there is a free block that is big enough
+  // When we iterate through the linked list of memory blocks we need to keep track of the previous block
+  struct memoryBlock *current, *previous;
   previous = headOfMemoryList;
   current = headOfMemoryList;
-  while (current) {
-    //If the current block is free and big enough, we use it
-    if (current->isFree && current->size == size) {
-      //We set the isFree flag to 0
-      current->isFree = 0;
-      //We return the address of the space after the memory block
-      return (void*) ((char*) current + sizeof(struct memoryBlock));
-    } else if (current->isFree && (current->size - sizeof(struct memoryBlock)) > size) {
 
-      //First we create a new memory block after the current block
-      struct memoryBlock *newBlock = (struct memoryBlock*) ((char*) current + sizeof(struct memoryBlock) + size);
-      //We set the size of the new block to the size of the current block minus the size of the memory block and the size of the new block
-      newBlock->size = current->size - size - sizeof(struct memoryBlock);
-      //We set the next pointer to the next pointer of the current block
-      newBlock->next = current->next;
-      //We set the isFree flag to 1
-      newBlock->isFree = 1;
+  // Here we check if there is a free block of memory that is big enough to hold the memory requested
+  // We iterate until current is null, which means we have reached the end of the list
+  while (current)
+  {
+    if (current->isFree)
+    {
+      // If the current block is free and the next block is free, we merge the two blocks
+      // We only need to check if the next block is free and not the one after it, because 
+      // of the way we do the free operation. 
+      if (current->next->isFree)
+      {
+        current->size += current->next->size + sizeof(struct memoryBlock);
+        current->next = current->next->next;
+      }
 
-      // now we adjust the current block:
-      //We set the size of the current block to the size of the new block
-      current->size = size;
-      //We set the next pointer to the new block
-      current->next = newBlock;
-      //We set the isFree flag to 0
-      current->isFree = 0;
-      //We return the address of the space after the memory block
-      return (void*) ((char*) current + sizeof(struct memoryBlock));
+      // If the current block is free and exact size we use it
+      if (current->size == size)
+      {
+        // We set the isFree flag to 0
+        current->isFree = 0;
+        // We return the address of the space after the memory block
+        return (void *)((char *)current + sizeof(struct memoryBlock));
+
+        // If the current block is free and big enough for we split it.
+        // Here we have to take into account that there needs to be space enough
+        // For an additional memoryblock object as well.
+      }
+      else if ((current->size - sizeof(struct memoryBlock)) > size)
+      {
+
+        // First we create a new memory block after the current block
+        struct memoryBlock *newBlock = (struct memoryBlock *)((char *)current + totalSize);
+        // We set the size of the new block to the size of the current block minus the total size of the allocated memory block
+        newBlock->size = current->size - totalSize;
+        // We set the next pointer to the next pointer of the current block
+        newBlock->next = current->next;
+        // We set the isFree flag to 1 - free
+        newBlock->isFree = 1;
+
+        // now we adjust the current block:
+        // We set the size of the current block to the size of the requested memory
+        current->size = size;
+        // We set the next pointer to the new block
+        current->next = newBlock;
+        // We set the isFree flag to 0
+        current->isFree = 0;
+        // We return the address of the space after the memory block
+        return (void *)((char *)current + sizeof(struct memoryBlock));
+      }
     }
-    //If the current block is not free or not big enough, we move on to the next block
+
+    // If the current block is not free or not big enough, we move on to the next block
     previous = current;
     current = current->next;
   }
-  //If we get to this point, it means that there is no free block that is big enough
-  //So we need to create a new block
-  int totalSize = size + sizeof(struct memoryBlock);
+
+  // If we get to this point, it means that there is no free block that is big enough
+  // So we need to create a new block
   char *startOfNewMemory;
-  //sbrk grows memory by the number of bytes specified
+  // sbrk grows memory by the number of bytes specified
   startOfNewMemory = sbrk(totalSize);
-  if (startOfNewMemory == (char*) -1) {
-    //If sbrk fails, we return 0
+  // If sbrk fails, we return 0
+  if (startOfNewMemory == (char *)-1)
+  {
     return 0;
   }
-  //If sbrk succeeds, we set the next pointer of the previous block to the start of the new memory
-  previous->next = (struct memoryBlock*) startOfNewMemory;
-  //We set the size of the new block to the size of the memory block
+  // If sbrk succeeds, we set the next pointer of the previous block to the start of the new memory
+  previous->next = (struct memoryBlock *)startOfNewMemory;
+  // We set the size of the new block to the size of the memory block
   previous->next->size = size;
-  //We set the isFree flag to 0
+  // We set the isFree flag to 0
   previous->next->isFree = 0;
-  //We return the address of the space after the memory block
-  return (void*) (startOfNewMemory + sizeof(struct memoryBlock));
+  // We return the address of the space after the memory block
+  return (void *)(startOfNewMemory + sizeof(struct memoryBlock));
 }
 
-
-//Function to free memory
-void _free(void *ptr) {
-  //If the pointer is null, we do nothing
-  if (!ptr) {
+// Function to free memory
+void _free(void *ptr)
+{
+  // If the pointer is null, we do nothing
+  if (!ptr)
+  {
     return;
   }
-  //If the pointer is not null, we set the isFree flag to 1
-  struct memoryBlock *block = (struct memoryBlock*) ((char*) ptr - sizeof(struct memoryBlock));
+  // If the pointer is not null, we set the isFree flag of the memory block to 1
+  struct memoryBlock *block = (struct memoryBlock *)((char *)ptr - sizeof(struct memoryBlock));
   block->isFree = 1;
 
-  //We also need to check if the next block is free. If it is, we merge the two blocks
-  if (block->next && block->next->isFree) {
+  // We also need to check if the next block is free. If it is, we merge the two blocks
+  if (block->next && block->next->isFree)
+  {
     block->size += block->next->size + sizeof(struct memoryBlock);
     block->next = block->next->next;
   }
-  //We also need to check if the previous block is free. If it is, we merge the two blocks
-  struct memoryBlock *current = headOfMemoryList;
-  struct memoryBlock *previous = headOfMemoryList;
-  while (current) {
-    if (current == block) {
-      if (previous->isFree) {
-        previous->size += current->size + sizeof(struct memoryBlock);
-        previous->next = current->next;
-      }
-      return;
-    }
-    previous = current;
-    current = current->next;
-  }
+  // In malloc we take into account that if the previous block is free, we merge the two blocks
 }
