@@ -64,9 +64,12 @@ void *_malloc(int size)
       // of the way we do the free operation.
       if (currentMemoryBlock->next != NULL && currentMemoryBlock->next->isFree)
       {
-        printf("Merging two free blocks of memory \n");
+        printf("Memory block size: %d \n", currentMemoryBlock->size);
         currentMemoryBlock->size += currentMemoryBlock->next->size + sizeof(struct memoryBlock);
         currentMemoryBlock->next = currentMemoryBlock->next->next;
+        printf("Merging two free blocks of memory \n");
+        //print memory block size
+        printf("Memory block size: %d \n", currentMemoryBlock->size);
       }
 
       // If the current block is free and exact size we use it
