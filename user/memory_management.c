@@ -201,19 +201,21 @@ int main(int argc, char *argv[])
   //
   int *array5 = (int *)_malloc(50 * sizeof(int));
   printf("should've done exact allocation\n");
-  _free(array5);
   _free(array2);
-  printf("should've done merge free memory\n");
-  
+  _free(array5);
+  printf("should do merge memory in fron\n");
+  array2 = (int *)_malloc(100 * sizeof(int));
+  /*
   // This is to check if the future proof memory merge works
   _free(array4);
   printf("Done freeing\n");
   // Checks if it has merged them correctly
-  array2 = (int *)_malloc(170 * sizeof(int));
+  
   array3 = (int *)_malloc(10 * sizeof(int));
   // Checks if it can allocate a new block even though some is free
   // int* array5 =
   (int *)_malloc(30 * sizeof(int));
+  */
 
   printf("Done reallocating\n");
   exit(0);
