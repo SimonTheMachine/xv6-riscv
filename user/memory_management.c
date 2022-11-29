@@ -201,7 +201,8 @@ int main(int argc, char *argv[])
   array2[0] = 1;
   array2[1] = 2;
   printf("Set first index of second array to 1\n");
-  int *first = array2[0];
+  //set first to be start of array
+  int *first = array2;
   int *second = first;
   first++;
   printf("Incremented first pointer\n");
