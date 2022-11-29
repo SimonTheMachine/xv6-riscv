@@ -178,6 +178,7 @@ int main(int argc, char *argv[])
     //Checks basic malloc expansion
     //int* array = 
     (int*) _malloc(100 * sizeof(int));
+    printf("Allocated first");
     int* array2 = (int*) _malloc(50 * sizeof(int));
     int* array3 = (int*) _malloc(50 * sizeof(int));
     int* array4 = (int*) _malloc(100 * sizeof(int));
