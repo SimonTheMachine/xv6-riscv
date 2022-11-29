@@ -134,8 +134,10 @@ void *_malloc(int size)
   {
     return 0;
   }
-  printf("Allocated %d bytes of memory", size);  
-  struct memoryBlock *newBlock = (struct memoryBlock *)startOfNewMemory;
+  printf("Allocated %d bytes of memory \n", size);  
+  struct memoryBlock *newBlock;
+  newBlock = (struct memoryBlock *)startOfNewMemory;
+  printf("Initialized new block \n");  
   // We set the size of the new block to the size of the memory block
   newBlock->size = size;
   // We set the isFree flag to 0
