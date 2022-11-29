@@ -105,12 +105,9 @@ void *_malloc(int size)
     }
 
     // If we reach the place we started iterating from then we need to allocate more memory eg. break the loop
-    if (currentMemoryBlock->next == iterationStart || headOfMemoryList->next == NULL)
+    if (headOfMemoryList->next == NULL)
     {
-      if (tailOfMemoryList == NULL)
-      {
-        tailOfMemoryList = currentMemoryBlock;
-      }
+      tailOfMemoryList = currentMemoryBlock;
       break;
     }
     // If the current block is not free or not big enough, we move on to the next block
@@ -125,6 +122,9 @@ void *_malloc(int size)
     {
       printf("Moving to next block\n");
       currentMemoryBlock = currentMemoryBlock->next;
+    }
+    if (currentMemoryBlock == iterationStart) {
+      break;
     }
     
     printf("Reached end of do while loop\n");
@@ -196,23 +196,6 @@ int main(int argc, char *argv[])
 
   int *array2 = (int *)_malloc(50 * sizeof(int));
   printf("Allocated second\n");
-
-  //set a pointer to first index of array
-  array2[0] = 1;
-  array2[1] = 2;
-  printf("Set first index of second array to 1\n");
-  //set first to be start of array
-  int *first = array2;
-  int *second = first;
-  // print if first and second are equal
-  printf("First and second are equal: %d\n", first == second);
-  first++;
-  printf("Incremented first pointer\n");
-  //print values of first and second
-  printf("First: %d\n", *first);
-  printf("Second: %d\n", *second);
-  printf("First and second are equal: %d\n", first == second);
-  /*
   int *array3 = (int *)_malloc(50 * sizeof(int));
   printf("Allocated third\n");
   int *array4 = (int *)_malloc(100 * sizeof(int));
@@ -232,6 +215,5 @@ int main(int argc, char *argv[])
   (int *)_malloc(30 * sizeof(int));
 
   printf("Done reallocating\n");
-  */
   exit(0);
 }
