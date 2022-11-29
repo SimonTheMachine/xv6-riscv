@@ -174,6 +174,7 @@ void _free(void *ptr)
 
 int main(int argc, char *argv[])
 {
+    printf("Started main");
     //Checks basic malloc expansion
     //int* array = 
     (int*) _malloc(100 * sizeof(int));

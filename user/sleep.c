@@ -2,7 +2,7 @@
 #include "user/user.h"
 // Sleep is a malloc tester now
 #include "memory_management.h"
-
+/*
 int main(int argc, char *argv[])
 {
 
@@ -30,7 +30,8 @@ int main(int argc, char *argv[])
     printf("Done reallocating");
     exit(0);
 }
-/*
+*/
+
 // function for usage informational message
 void usage()
 {
@@ -54,6 +55,5 @@ int main(int argc, char *argv[])
   // exit logging success state
   exit(0);
 }
-*/
 
 
