@@ -39,7 +39,7 @@ void *_malloc(int size)
     // We set the current memory block to the head
     currentMemoryBlock = headOfMemoryList;
     // We return the address of the space after the memory block
-    printf("Allocated %d bytes of memory", size);
+    printf("Allocated %d bytes of memory \n", size);
     return (void *)(startOfNewMemory + sizeof(struct memoryBlock));
   }
 
@@ -117,11 +117,13 @@ void *_malloc(int size)
     // If the next block is null, we set the current block to the head of the list
     if (currentMemoryBlock->next == NULL)
     {
+      printf("Moved to head");
       tailOfMemoryList = currentMemoryBlock;
       currentMemoryBlock = headOfMemoryList;
     }
     else
     {
+      printf("Moving to next block\n");
       currentMemoryBlock = currentMemoryBlock->next;
     }
     
