@@ -199,7 +199,7 @@ int main(int argc, char *argv[])
   // Checks if free function works (with the memory merge thing)
   _free(array2);
   _free(array3);
-  array2 = (int *)_malloc(100 * sizeof(int));
+  array2 = (int *)_malloc(416);
   printf("should do merge memory in front\n");
 
   /*
