@@ -39,6 +39,7 @@ void *_malloc(int size)
     // We set the current memory block to the head
     currentMemoryBlock = headOfMemoryList;
     // We return the address of the space after the memory block
+    printf("Allocated %d bytes of memory at address %d", size, (int)currentMemoryBlock + sizeof(struct memoryBlock));
     return (void *)(startOfNewMemory + sizeof(struct memoryBlock));
   }
 
@@ -133,6 +134,7 @@ void *_malloc(int size)
   {
     return 0;
   }
+  printf("Allocated %d bytes of memory at address %d", size, (int)currentMemoryBlock + sizeof(struct memoryBlock));
   // If sbrk succeeds, we set the next pointer of the previous block to the start of the new memory
   tailOfMemoryList->next = (struct memoryBlock *)startOfNewMemory;
   // We set the size of the new block to the size of the memory block
