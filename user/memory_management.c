@@ -192,8 +192,23 @@ int main(int argc, char *argv[])
   // int* array =
   (int *)_malloc(100 * sizeof(int));
   printf("Allocated first\n");
+
+
   int *array2 = (int *)_malloc(50 * sizeof(int));
   printf("Allocated second\n");
+
+  //set a pointer to first index of array
+  array2[0] = 1;
+  array2[1] = 2;
+  printf("Set first index of second array to 1\n");
+  int *first = array2[0];
+  int *second = first;
+  first++;
+  printf("Incremented first pointer\n");
+  //print values of first and second
+  printf("First: %d\n", *first);
+  printf("Second: %d\n", *second);
+  /*
   int *array3 = (int *)_malloc(50 * sizeof(int));
   printf("Allocated third\n");
   int *array4 = (int *)_malloc(100 * sizeof(int));
@@ -213,5 +228,6 @@ int main(int argc, char *argv[])
   (int *)_malloc(30 * sizeof(int));
 
   printf("Done reallocating\n");
+  */
   exit(0);
 }
