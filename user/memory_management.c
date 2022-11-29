@@ -119,7 +119,7 @@ void *_malloc(int size)
       }
     }
     printf("Reached end of do while loop\n");
-  } while (currentMemoryBlock->next != iterationStart && (headOfMemoryList->next == NULL));
+  } while (currentMemoryBlock->next != iterationStart && (headOfMemoryList->next != NULL));
   printf("Got out of while loop\n");
 
   // If we get to this point, it means that there is no free block that is big enough
