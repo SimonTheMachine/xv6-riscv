@@ -28,6 +28,7 @@ int main()
     (int*) _malloc(30 * sizeof(int));
 
     printf("Done reallocating");
+    exit(0);
 }
 /*
 // function for usage informational message
