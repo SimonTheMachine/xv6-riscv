@@ -188,27 +188,20 @@ void _free(void *ptr)
 
 int main(int argc, char *argv[])
 {
-  printf("Started main\n");
   // Checks basic malloc expansion
   // int* array =
   (int *)_malloc(100 * sizeof(int));
-  printf("Allocated first\n");
   int *array2 = (int *)_malloc(50 * sizeof(int));
-  printf("Allocated second\n");
   int *array3 = (int *)_malloc(50 * sizeof(int));
-  printf("Allocated third\n");
   //int *array4 = 
   (int *)_malloc(100 * sizeof(int));
   printf("Done allocating\n");
   // Checks if free function works (with the memory merge thing)
-  _free(array3);
-  //
-  int *array5 = (int *)_malloc(50 * sizeof(int));
-  printf("should've done exact allocation\n");
   _free(array2);
-  _free(array5);
-  printf("should do merge memory in fron\n");
+  _free(array3);
   array2 = (int *)_malloc(100 * sizeof(int));
+  printf("should do merge memory in front\n");
+
   /*
   // This is to check if the future proof memory merge works
   _free(array4);
