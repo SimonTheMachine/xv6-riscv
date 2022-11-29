@@ -144,6 +144,7 @@ void *_malloc(int size)
   newBlock->isFree = 0;
   // We set the next pointer to null
   newBlock->next = NULL;
+  printf("Almost set all new block properties \n");
   // If sbrk succeeds, we set the next pointer of the previous block to the start of the new memory
   tailOfMemoryList->next = newBlock;
   // We return the address of the space after the memory block
