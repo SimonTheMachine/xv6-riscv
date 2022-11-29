@@ -194,7 +194,8 @@ int main(int argc, char *argv[])
   printf("Allocated second\n");
   int *array3 = (int *)_malloc(50 * sizeof(int));
   printf("Allocated third\n");
-  int *array4 = (int *)_malloc(100 * sizeof(int));
+  //int *array4 = 
+  (int *)_malloc(100 * sizeof(int));
   printf("Done allocating\n");
   // Checks if free function works (with the memory merge thing)
   _free(array3);
