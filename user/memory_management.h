@@ -17,3 +17,6 @@ extern struct memoryBlock *headOfMemoryList, *currentMemoryBlock;
 void* _malloc(int size);
 //Function to free memory
 void _free(void *ptr);
+
+//main used for testing
+int main(int argc, char *argv[]);

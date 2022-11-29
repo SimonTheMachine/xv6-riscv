@@ -171,3 +171,30 @@ void _free(void *ptr)
   }
   // In malloc we take into account that if the previous block is free, we merge the two blocks
 }
+
+int main(int argc, char *argv[])
+{
+    //Checks basic malloc expansion
+    //int* array = 
+    (int*) _malloc(100 * sizeof(int));
+    int* array2 = (int*) _malloc(50 * sizeof(int));
+    int* array3 = (int*) _malloc(50 * sizeof(int));
+    int* array4 = (int*) _malloc(100 * sizeof(int));
+    printf("Done allocating");
+    //Checks if free function works (with the memory merge thing)
+    _free(array3);
+    _free(array2);
+    
+    //This is to check if the future proof memory merge works
+    _free(array4);
+    printf("Done freeing");
+    //Checks if it has merged them correctly
+    array2 = (int*) _malloc(170 * sizeof(int));
+    array3 = (int*) _malloc(10 * sizeof(int));
+    //Checks if it can allocate a new block even though some is free
+    //int* array5 = 
+    (int*) _malloc(30 * sizeof(int));
+
+    printf("Done reallocating");
+    exit(0);
+}
