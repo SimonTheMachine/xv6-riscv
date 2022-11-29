@@ -7,7 +7,8 @@ int main()
 {
 
     //Checks basic malloc expansion
-    int* array = (int*) _malloc(100 * sizeof(int));
+    //int* array = 
+    (int*) _malloc(100 * sizeof(int));
     int* array2 = (int*) _malloc(50 * sizeof(int));
     int* array3 = (int*) _malloc(50 * sizeof(int));
     int* array4 = (int*) _malloc(100 * sizeof(int));
@@ -23,7 +24,8 @@ int main()
     array2 = (int*) _malloc(170 * sizeof(int));
     array3 = (int*) _malloc(10 * sizeof(int));
     //Checks if it can allocate a new block even though some is free
-    int* array5 = (int*) _malloc(30 * sizeof(int));
+    //int* array5 = 
+    (int*) _malloc(30 * sizeof(int));
 
     printf("Done reallocating");
 }
