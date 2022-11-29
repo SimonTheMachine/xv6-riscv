@@ -105,10 +105,7 @@ void *_malloc(int size)
     }
 
     // If we reach the place we started iterating from then we need to allocate more memory eg. break the loop
-    if (currentMemoryBlock->next == iterationStart || headOfMemoryList->next == NULL)
-    {
-      break;
-    }
+    
     // If the current block is not free or not big enough, we move on to the next block
     // If the next block is null, we set the current block to the head of the list
     if (currentMemoryBlock->next == NULL)
@@ -119,6 +116,10 @@ void *_malloc(int size)
     else
     {
       currentMemoryBlock = currentMemoryBlock->next;
+    }
+    if (currentMemoryBlock->next == iterationStart || headOfMemoryList->next == NULL)
+    {
+      break;
     }
     printf("Reached end of do while loop\n");
   } while (1);
