@@ -64,6 +64,7 @@ void *_malloc(int size)
       // of the way we do the free operation.
       if (currentMemoryBlock->next != NULL && currentMemoryBlock->next->isFree)
       {
+        printf("Merging two free blocks of memory \n");
         currentMemoryBlock->size += currentMemoryBlock->next->size + sizeof(struct memoryBlock);
         currentMemoryBlock->next = currentMemoryBlock->next->next;
       }
@@ -71,6 +72,7 @@ void *_malloc(int size)
       // If the current block is free and exact size we use it
       if (currentMemoryBlock->size == size)
       {
+        printf("Using free block of memory of exact same size\n");
         // We set the isFree flag to 0
         currentMemoryBlock->isFree = 0;
         // We return the address of the space after the memory block
@@ -82,6 +84,7 @@ void *_malloc(int size)
       }
       else if ((currentMemoryBlock->size - sizeof(struct memoryBlock)) > size)
       {
+        printf("Using free block of memory and splitting it\n");
 
         // First we create a new memory block after the current block
         struct memoryBlock *newBlock = (struct memoryBlock *)((char *)currentMemoryBlock + totalSize);
@@ -114,22 +117,18 @@ void *_malloc(int size)
     // If the next block is null, we set the current block to the head of the list
     if (currentMemoryBlock->next == NULL)
     {
-      printf("Moved to head");
       tailOfMemoryList = currentMemoryBlock;
       currentMemoryBlock = headOfMemoryList;
     }
     else
     {
-      printf("Moving to next block\n");
       currentMemoryBlock = currentMemoryBlock->next;
     }
     if (currentMemoryBlock == iterationStart) {
       break;
     }
     
-    printf("Reached end of do while loop\n");
   } while (1);
-  printf("Got out of while loop\n");
 
   // If we get to this point, it means that there is no free block that is big enough
   // So we need to create a new block
@@ -141,21 +140,18 @@ void *_malloc(int size)
   {
     return 0;
   }
-  printf("Allocated %d bytes of memory \n", size);  
+  printf("Allocated new bytes of memory because there wasn't enough space\n", size);  
   struct memoryBlock *newBlock;
   newBlock = (struct memoryBlock *)startOfNewMemory;
-  printf("Initialized new block \n");  
   // We set the size of the new block to the size of the memory block
   newBlock->size = size;
   // We set the isFree flag to 0
   newBlock->isFree = 0;
   // We set the next pointer to null
   newBlock->next = NULL;
-  printf("Almost set all new block properties \n");
   // If sbrk succeeds, we set the next pointer of the previous block to the start of the new memory
   tailOfMemoryList->next = newBlock;
   // We return the address of the space after the memory block
-  printf("Succesfully allocated additional memory\n");
   return (void *)(startOfNewMemory + sizeof(struct memoryBlock));
 }
 
@@ -170,6 +166,7 @@ void _free(void *ptr)
   // If the pointer is not null, we set the isFree flag of the memory block to 1
   struct memoryBlock *block = (struct memoryBlock *)((char *)ptr - sizeof(struct memoryBlock));
   block->isFree = 1;
+  printf("Freed %d bytes of memory \n", block->size);
 
   // We also need to check if the next block is free. If it is, we merge the two blocks
   if (block->next && block->next->isFree)
@@ -181,6 +178,7 @@ void _free(void *ptr)
     }
     block->size += block->next->size + sizeof(struct memoryBlock);
     block->next = block->next->next;
+    printf("Merging two free blocks of memory inside free\n");
   }
   // In malloc we take into account that if the previous block is free, we merge the two blocks
 }
@@ -192,8 +190,6 @@ int main(int argc, char *argv[])
   // int* array =
   (int *)_malloc(100 * sizeof(int));
   printf("Allocated first\n");
-
-
   int *array2 = (int *)_malloc(50 * sizeof(int));
   printf("Allocated second\n");
   int *array3 = (int *)_malloc(50 * sizeof(int));
@@ -202,8 +198,13 @@ int main(int argc, char *argv[])
   printf("Done allocating\n");
   // Checks if free function works (with the memory merge thing)
   _free(array3);
+  //
+  int *array5 = (int *)_malloc(50 * sizeof(int));
+  printf("should've done exact allocation\n");
+  _free(array5);
   _free(array2);
-
+  printf("should've done merge free memory\n");
+  
   // This is to check if the future proof memory merge works
   _free(array4);
   printf("Done freeing\n");
