@@ -3,7 +3,7 @@
 // Sleep is a malloc tester now
 #include "memory_management.h"
 
-int main()
+int main(int argc, char *argv[])
 {
 
     //Checks basic malloc expansion
