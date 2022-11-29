@@ -135,14 +135,15 @@ void *_malloc(int size)
     return 0;
   }
   printf("Allocated %d bytes of memory", size);  
-  // If sbrk succeeds, we set the next pointer of the previous block to the start of the new memory
-  tailOfMemoryList->next = (struct memoryBlock *)startOfNewMemory;
+  struct memoryBlock *newBlock = (struct memoryBlock *)startOfNewMemory;
   // We set the size of the new block to the size of the memory block
-  tailOfMemoryList->next->size = size;
+  newBlock->size = size;
   // We set the isFree flag to 0
-  tailOfMemoryList->next->isFree = 0;
+  newBlock->isFree = 0;
   // We set the next pointer to null
-  tailOfMemoryList->next->next = NULL;
+  newBlock->next = NULL;
+  // If sbrk succeeds, we set the next pointer of the previous block to the start of the new memory
+  tailOfMemoryList->next = newBlock;
   // We return the address of the space after the memory block
   printf("Succesfully allocated additional memory\n");
   return (void *)(startOfNewMemory + sizeof(struct memoryBlock));
