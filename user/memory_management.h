@@ -9,10 +9,10 @@ struct memoryBlock{
  //Boolean to tell if the memory is free or not. 1 = free, 0 = not free
  int isFree;
   //Pointer to the next memory block
- struct memoryBlock *next; 
+ struct memoryBlock *next;
 };
-//Pointer to the head of the memory list
-extern struct memoryBlock *headOfMemoryList;
+//Pointer to the head of the memory list, and a pointer to the current memory block
+extern struct memoryBlock *headOfMemoryList, *currentMemoryBlock;
 //Function to allocate memory
 void* _malloc(int size);
 //Function to free memory
