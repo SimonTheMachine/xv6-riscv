@@ -211,6 +211,7 @@ int main(int argc, char *argv[])
   //print values of first and second
   printf("First: %d\n", *first);
   printf("Second: %d\n", *second);
+  printf("First and second are equal: %d\n", first == second);
   /*
   int *array3 = (int *)_malloc(50 * sizeof(int));
   printf("Allocated third\n");
