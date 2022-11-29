@@ -43,26 +43,24 @@ void *_malloc(int size)
   }
 
   // When we iterate through the linked list of memory blocks we need to keep track of the previous block
-  // Since we do next fit allocation, we need to be able to go back to head, and then continue until we 
-  // reach the current memory block again. This is why we have iterationStart. 
+  // Since we do next fit allocation, we need to be able to go back to head, and then continue until we
+  // reach the current memory block again. This is why we have iterationStart.
   // We need to store tail so we can expand memory if we need to.
   struct memoryBlock *iterationStart, *tailOfMemoryList;
   iterationStart = currentMemoryBlock;
   tailOfMemoryList = NULL;
 
-
   // Here we check if there is a free block of memory that is big enough to hold the memory requested
   // We iterate until current is null, which means we have reached the end of the list
-  // While true is a bit of a hack, but it works. We only exit the loop if we reach iterationStart again.
-  while (1)
+  do
   {
-    
+
     if (currentMemoryBlock->isFree)
     {
 
       // If the current block is free and the next block is free, we merge the two blocks
-      // We only need to check if the next block is free and not the one after it, because 
-      // of the way we do the free operation. 
+      // We only need to check if the next block is free and not the one after it, because
+      // of the way we do the free operation.
       if (currentMemoryBlock->next != NULL && currentMemoryBlock->next->isFree)
       {
         currentMemoryBlock->size += currentMemoryBlock->next->size + sizeof(struct memoryBlock);
@@ -104,24 +102,24 @@ void *_malloc(int size)
         return (void *)((char *)currentMemoryBlock + sizeof(struct memoryBlock));
       }
     }
-    
-    //If we reach the place we started iterating from then we need to allocate more memory eg. break the loop
-    if (currentMemoryBlock->next == iterationStart)
+
+    // If we reach the place we started iterating from then we need to allocate more memory eg. break the loop
+    if (currentMemoryBlock->next != iterationStart)
     {
-      break;
+      // If the current block is not free or not big enough, we move on to the next block
+      // If the next block is null, we set the current block to the head of the list
+      if (currentMemoryBlock->next == NULL)
+      {
+        tailOfMemoryList = currentMemoryBlock;
+        currentMemoryBlock = headOfMemoryList;
+      }
+      else
+      {
+        currentMemoryBlock = currentMemoryBlock->next;
+      }
     }
-    // If the current block is not free or not big enough, we move on to the next block
-    // If the next block is null, we set the current block to the head of the list
-    if (currentMemoryBlock->next == NULL)
-    {
-      tailOfMemoryList = currentMemoryBlock;
-      currentMemoryBlock = headOfMemoryList;
-    }
-    else
-    {
-      currentMemoryBlock = currentMemoryBlock->next;
-    }
-  }
+    printf("Reached end of do while loop");
+  } while (currentMemoryBlock->next == iterationStart);
 
   // If we get to this point, it means that there is no free block that is big enough
   // So we need to create a new block
@@ -157,7 +155,6 @@ void _free(void *ptr)
   struct memoryBlock *block = (struct memoryBlock *)((char *)ptr - sizeof(struct memoryBlock));
   block->isFree = 1;
 
-
   // We also need to check if the next block is free. If it is, we merge the two blocks
   if (block->next && block->next->isFree)
   {
@@ -174,29 +171,29 @@ void _free(void *ptr)
 
 int main(int argc, char *argv[])
 {
-    printf("Started main");
-    //Checks basic malloc expansion
-    //int* array = 
-    (int*) _malloc(100 * sizeof(int));
-    printf("Allocated first");
-    int* array2 = (int*) _malloc(50 * sizeof(int));
-    int* array3 = (int*) _malloc(50 * sizeof(int));
-    int* array4 = (int*) _malloc(100 * sizeof(int));
-    printf("Done allocating");
-    //Checks if free function works (with the memory merge thing)
-    _free(array3);
-    _free(array2);
-    
-    //This is to check if the future proof memory merge works
-    _free(array4);
-    printf("Done freeing");
-    //Checks if it has merged them correctly
-    array2 = (int*) _malloc(170 * sizeof(int));
-    array3 = (int*) _malloc(10 * sizeof(int));
-    //Checks if it can allocate a new block even though some is free
-    //int* array5 = 
-    (int*) _malloc(30 * sizeof(int));
+  printf("Started main");
+  // Checks basic malloc expansion
+  // int* array =
+  (int *)_malloc(100 * sizeof(int));
+  printf("Allocated first");
+  int *array2 = (int *)_malloc(50 * sizeof(int));
+  int *array3 = (int *)_malloc(50 * sizeof(int));
+  int *array4 = (int *)_malloc(100 * sizeof(int));
+  printf("Done allocating");
+  // Checks if free function works (with the memory merge thing)
+  _free(array3);
+  _free(array2);
 
-    printf("Done reallocating");
-    exit(0);
+  // This is to check if the future proof memory merge works
+  _free(array4);
+  printf("Done freeing");
+  // Checks if it has merged them correctly
+  array2 = (int *)_malloc(170 * sizeof(int));
+  array3 = (int *)_malloc(10 * sizeof(int));
+  // Checks if it can allocate a new block even though some is free
+  // int* array5 =
+  (int *)_malloc(30 * sizeof(int));
+
+  printf("Done reallocating");
+  exit(0);
 }
