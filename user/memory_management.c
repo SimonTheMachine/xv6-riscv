@@ -204,6 +204,8 @@ int main(int argc, char *argv[])
   //set first to be start of array
   int *first = array2;
   int *second = first;
+  // print if first and second are equal
+  printf("First and second are equal: %d\n", first == second);
   first++;
   printf("Incremented first pointer\n");
   //print values of first and second
